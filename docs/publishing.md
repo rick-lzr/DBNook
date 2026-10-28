@@ -1,6 +1,6 @@
 # 开源与 Marketplace 发布
 
-GitHub 仓库地址已确认：https://github.com/rick-lzr/DBNook 。本地源码准备中，公开作者和 Marketplace Publisher 尚未配置，未推送或发布。当前名称 DBNook：检索未发现同名 Marketplace 扩展，不代表商标审查结论。
+源码仓库：https://github.com/rick-lzr/DBNook 。源码已推送至 GitHub；公开作者和 Marketplace Publisher 尚未配置，尚未发布 Marketplace。当前名称 DBNook：检索未发现同名 Marketplace 扩展，不代表商标审查结论。
 
 ## 需要维护者提供
 
