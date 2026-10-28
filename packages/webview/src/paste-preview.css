@@ -1,0 +1,9 @@
+.paste-preview {width:min(850px,calc(100vw - 48px));max-height:85vh;color:var(--vscode-foreground);background:var(--vscode-editorWidget-background);border:1px solid var(--vscode-panel-border);border-radius:6px;padding:24px;}
+.paste-preview::backdrop {background:rgb(0 0 0 / 55%);}
+.paste-preview h2 {margin:0 0 12px;font-size:18px;}
+.paste-preview p {line-height:1.6;}
+.paste-scroll {max-height:50vh;overflow:auto;margin:16px 0;}
+.paste-scroll table {width:100%;border-collapse:collapse;}
+.paste-scroll th,.paste-scroll td {text-align:left;padding:8px;border-bottom:1px solid var(--vscode-panel-border);vertical-align:top;}
+.paste-scroll code {white-space:pre-wrap;overflow-wrap:anywhere;}
+.paste-actions {display:flex;justify-content:flex-end;gap:12px;}

@@ -1,0 +1,12 @@
+import {readFile,mkdir} from 'node:fs/promises';
+import {spawn} from 'node:child_process';
+import {resolve} from 'node:path';
+const offline=process.argv.includes('--offline'),p=JSON.parse(await readFile('package.json','utf8'));
+const run=async(args)=>{const child=spawn(process.execPath,args,{stdio:'inherit',windowsHide:true});const code=await new Promise((res,rej)=>{child.once('error',rej);child.once('exit',res);});if(code!==0)throw new Error(`Packaging step failed (${code}).`);};
+await mkdir('artifacts',{recursive:true});
+if(offline)await run(['scripts/prepare-offline-runtime.mjs']);
+const output=`artifacts/${p.name}-${p.version}${offline?'-win32-x64-offline':''}.vsix`;
+const args=[resolve('node_modules/@vscode/vsce/vsce'),'package','--no-dependencies','--readme-path','docs/extension-readme.md','--out',output];
+if(!p.repository)args.push('--allow-missing-repository');
+if(offline)args.push('--ignoreFile','.vscodeignore-offline','--target','win32-x64');
+await run(args);await run(['scripts/verify-vsix.mjs',output,...(offline?['--offline']:[])]);

@@ -1,0 +1,1330 @@
+{
+  "name": "dbnook",
+  "displayName": "DBNook",
+  "description": "Connect, query and edit SQLite, PostgreSQL, MySQL and MariaDB inside VS Code.",
+  "version": "0.28.0",
+  "publisher": "local-db-workbench",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "engines": {
+    "vscode": "^1.95.0",
+    "node": ">=22.16.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "main": "./dist/extension.cjs",
+  "activationEvents": [
+    "onLanguage:sql",
+    "onStartupFinished"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Database access requires a trusted workspace."
+    },
+    "virtualWorkspaces": false
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "pretest": "node scripts/build.mjs --runner-only",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "check": "npm run typecheck && npm test && npm run build",
+    "package": "node scripts/package.mjs",
+    "package:offline": "node scripts/package.mjs --offline",
+    "dev:web": "vite --config vite.config.ts",
+    "preview": "npm run build && tsx packages/dev-server/src/main.ts",
+    "test:extension": "node scripts/test-extension.mjs",
+    "pretest:extension": "npm run build",
+    "vscode:prepublish": "node scripts/generate-notices.mjs && npm run build",
+    "test:postgres": "node scripts/test-postgres.mjs",
+    "test:mysql": "node scripts/test-mysql.mjs",
+    "test:mariadb": "node scripts/test-mariadb.mjs",
+    "test:structure-matrix": "node scripts/test-structure-matrix.mjs",
+    "notices": "node scripts/generate-notices.mjs",
+    "audit:public": "node scripts/audit-public.mjs",
+    "release:check": "node scripts/audit-public.mjs --release"
+  },
+  "dependencies": {
+    "ag-grid-community": "^34.3.1",
+    "ag-grid-react": "^34.3.1",
+    "mysql2": "^3.24.6",
+    "pg": "^8.23.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sql-formatter": "^15.9.0",
+    "ssh2": "^1.17.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@types/ssh2": "^1.15.6",
+    "@types/vscode": "1.95.0",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.0",
+    "esbuild": "^0.25.12",
+    "tsx": "^4.20.0",
+    "typescript": "^6.0.2",
+    "vite": "^7.3.6",
+    "jszip": "^3.10.1"
+  },
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "dbWorkbench.tableEditor",
+        "displayName": "DBNook Table",
+        "selector": [
+          {
+            "filenamePattern": "*.dbwtable"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dbWorkbench",
+          "title": "DBNook",
+          "icon": "media/database.svg"
+        }
+      ]
+    },
+    "views": {
+      "dbWorkbench": [
+        {
+          "id": "dbWorkbench.connections",
+          "name": "Connections"
+        },
+        {
+          "id": "dbWorkbench.tunnels",
+          "name": "Tunnels"
+        },
+        {
+          "id": "dbWorkbench.authenticationProfiles",
+          "name": "Authentication Profiles"
+        },
+        {
+          "id": "dbWorkbench.history",
+          "name": "Query History"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "dbWorkbench.connections",
+        "contents": "No connections created.\n[Add Connection](command:dbWorkbench.addConnection)\n[Import Connections](command:dbWorkbench.importConnections)\n[Explore With a Sample Database](command:dbWorkbench.sample)",
+        "when": "dbWorkbench.empty"
+      },
+      {
+        "view": "dbWorkbench.tunnels",
+        "contents": "Create a reusable SSH tunnel for database connections.\n[Add SSH Tunnel](command:dbWorkbench.tunnel.add)"
+      },
+      {
+        "view": "dbWorkbench.authenticationProfiles",
+        "contents": "Share database credentials across connections.\n[Add Authentication Profile](command:dbWorkbench.auth.add)"
+      },
+      {
+        "view": "dbWorkbench.history",
+        "contents": "Query history is disabled. Enabling it stores executed SQL and summaries locally.\n[Enable Query History](command:dbWorkbench.history.enable)",
+        "when": "!dbWorkbench.historyEnabled"
+      }
+    ],
+    "commands": [
+      {
+        "command": "dbWorkbench.clearSqlParameters",
+        "title": "Clear SQL Parameter Values",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.addConnection",
+        "title": "Add Connection",
+        "category": "DBNook",
+        "icon": "$(add)"
+      },
+      {
+        "command": "dbWorkbench.importConnections",
+        "title": "Import Connections",
+        "category": "DBNook",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "dbWorkbench.exportConnections",
+        "title": "Export Connections",
+        "category": "DBNook",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "dbWorkbench.copyConnectionString",
+        "title": "Copy Connection String",
+        "category": "DBNook",
+        "icon": "$(link)"
+      },
+      {
+        "command": "dbWorkbench.filterConnections",
+        "title": "Filter Connections",
+        "category": "DBNook",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "dbWorkbench.clearConnectionFilter",
+        "title": "Clear Connection Filter",
+        "category": "DBNook",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "dbWorkbench.filterObjects",
+        "title": "Filter Tables and Views (LIKE)",
+        "category": "DBNook",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "dbWorkbench.clearObjectFilter",
+        "title": "Clear Object Filter",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.groupConnections",
+        "title": "Move Connections to Group",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.ungroupConnections",
+        "title": "Remove Connections from Group",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.renameGroup",
+        "title": "Rename Group",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.removeGroup",
+        "title": "Remove Group (Keep Connections)",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.moveGroupUp",
+        "title": "Move Group Up",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.moveGroupDown",
+        "title": "Move Group Down",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.addFavorite",
+        "title": "Add Object to Favorites",
+        "category": "DBNook",
+        "icon": "$(star-empty)"
+      },
+      {
+        "command": "dbWorkbench.removeFavorite",
+        "title": "Remove Object from Favorites",
+        "category": "DBNook",
+        "icon": "$(star-full)"
+      },
+      {
+        "command": "dbWorkbench.copyLabel",
+        "title": "Copy Name",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.copyQualifiedName",
+        "title": "Copy Qualified Name",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.quickOpenObject",
+        "title": "Quick Open Database Object",
+        "category": "DBNook",
+        "icon": "$(search)"
+      },
+      {
+        "command": "dbWorkbench.diagnoseConnections",
+        "title": "Diagnose Connection Settings",
+        "category": "DBNook",
+        "icon": "$(warning)"
+      },
+      {
+        "command": "dbWorkbench.editConnection",
+        "title": "Edit Connection",
+        "category": "DBNook",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "dbWorkbench.duplicateConnection",
+        "title": "Duplicate Connection",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.deleteConnection",
+        "title": "Delete Connection",
+        "category": "DBNook",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "dbWorkbench.disconnect",
+        "title": "Disconnect",
+        "category": "DBNook",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "dbWorkbench.refresh",
+        "title": "Refresh",
+        "category": "DBNook",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "dbWorkbench.openTable",
+        "title": "Open Table",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.newQuery",
+        "title": "New SQL Query",
+        "category": "DBNook",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "dbWorkbench.execute",
+        "title": "Execute SQL",
+        "category": "DBNook",
+        "icon": "$(play)",
+        "enablement": "resourceScheme != dbw-plan"
+      },
+      {
+        "command": "dbWorkbench.cancel",
+        "title": "Cancel Query",
+        "category": "DBNook",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "dbWorkbench.selectConnection",
+        "title": "Select Connection for SQL Document",
+        "category": "DBNook",
+        "icon": "$(database)",
+        "enablement": "resourceScheme != dbw-plan"
+      },
+      {
+        "command": "dbWorkbench.beginTransaction",
+        "title": "Begin Transaction",
+        "category": "DBNook",
+        "enablement": "resourceScheme != dbw-plan"
+      },
+      {
+        "command": "dbWorkbench.commitTransaction",
+        "title": "Commit Transaction",
+        "category": "DBNook",
+        "icon": "$(check)",
+        "enablement": "resourceScheme != dbw-plan"
+      },
+      {
+        "command": "dbWorkbench.rollbackTransaction",
+        "title": "Roll Back Transaction",
+        "category": "DBNook",
+        "icon": "$(discard)",
+        "enablement": "resourceScheme != dbw-plan"
+      },
+      {
+        "command": "dbWorkbench.resetSession",
+        "title": "Reset SQL Document Session",
+        "category": "DBNook",
+        "enablement": "resourceScheme != dbw-plan"
+      },
+      {
+        "command": "dbWorkbench.sessionActions",
+        "title": "SQL Document Session Actions",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.sample",
+        "title": "Explore With a Sample Database",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.defaultConnection",
+        "title": "Set Workspace Default Connection",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.auth.add",
+        "title": "Add Authentication Profile",
+        "category": "DBNook",
+        "icon": "$(add)"
+      },
+      {
+        "command": "dbWorkbench.auth.edit",
+        "title": "Edit Authentication Profile",
+        "category": "DBNook",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "dbWorkbench.auth.delete",
+        "title": "Delete Authentication Profile",
+        "category": "DBNook",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "dbWorkbench.auth.refresh",
+        "title": "Refresh Authentication Profiles",
+        "category": "DBNook",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "dbWorkbench.auth.clearCache",
+        "title": "Clear Credential Cache",
+        "category": "DBNook",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "dbWorkbench.tunnel.add",
+        "title": "Add SSH Tunnel",
+        "category": "DBNook",
+        "icon": "$(add)"
+      },
+      {
+        "command": "dbWorkbench.tunnel.edit",
+        "title": "Edit SSH Tunnel",
+        "category": "DBNook",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "dbWorkbench.tunnel.source",
+        "title": "Edit SSH Config Source",
+        "category": "DBNook",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "dbWorkbench.tunnel.delete",
+        "title": "Delete SSH Tunnel",
+        "category": "DBNook",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "dbWorkbench.tunnel.disconnect",
+        "title": "Disconnect SSH Tunnel",
+        "category": "DBNook",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "dbWorkbench.tunnel.logs",
+        "title": "View Tunnel Logs",
+        "category": "DBNook",
+        "icon": "$(output)"
+      },
+      {
+        "command": "dbWorkbench.tunnel.refresh",
+        "title": "Refresh Tunnels",
+        "category": "DBNook",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "dbWorkbench.executeCurrent",
+        "title": "Execute Current SQL Statement",
+        "category": "DBNook",
+        "icon": "$(play)",
+        "enablement": "resourceScheme != dbw-plan"
+      },
+      {
+        "command": "dbWorkbench.refreshSqlMetadata",
+        "title": "Refresh SQL Completion Metadata",
+        "category": "DBNook",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "dbWorkbench.history.enable",
+        "title": "Enable Local Query History",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.history.disable",
+        "title": "Disable Local Query History",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.history.refresh",
+        "title": "Refresh Query History",
+        "category": "DBNook",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "dbWorkbench.history.search",
+        "title": "Search Query History",
+        "category": "DBNook",
+        "icon": "$(search)"
+      },
+      {
+        "command": "dbWorkbench.history.copy",
+        "title": "Copy SQL",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.history.open",
+        "title": "Open SQL from History",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.history.delete",
+        "title": "Delete History Entry",
+        "category": "DBNook",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "dbWorkbench.history.clear",
+        "title": "Clear Local Query History",
+        "category": "DBNook",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "dbWorkbench.createTable",
+        "title": "Create Table",
+        "category": "DBNook",
+        "icon": "$(add)"
+      },
+      {
+        "command": "dbWorkbench.tableStructure",
+        "title": "View / Edit Table Structure",
+        "category": "DBNook",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "dbWorkbench.openDefinition",
+        "title": "Open Object Definition",
+        "category": "DBNook",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "dbWorkbench.previewDefinition",
+        "title": "Preview Definition Changes",
+        "category": "DBNook",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "dbWorkbench.applyDefinition",
+        "title": "Apply Definition Changes",
+        "category": "DBNook",
+        "icon": "$(check)"
+      },
+      {
+        "command": "dbWorkbench.compareDefinition",
+        "title": "Compare Opened Definition with Server",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.reloadDefinition",
+        "title": "Reload Definition from Server",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.mapDefinitionColumns",
+        "title": "Map Renamed Columns",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.collectDiagnostics",
+        "title": "Collect Diagnostic Report",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.showOutput",
+        "title": "Show Diagnostic Output",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.sqliteBackup",
+        "title": "SQLite Backup / Restore",
+        "category": "DBNook",
+        "icon": "$(archive)"
+      },
+      {
+        "command": "dbWorkbench.importTableData",
+        "title": "Import CSV / JSON into Table",
+        "category": "DBNook",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "dbWorkbench.exportTableData",
+        "title": "Export All Saved Table Rows",
+        "category": "DBNook",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "dbWorkbench.exportQueryData",
+        "title": "Export Current SELECT 路 All Rows",
+        "category": "DBNook",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "dbWorkbench.serverBackup",
+        "title": "Server Backup / Restore",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.compareTables",
+        "title": "Compare Data / Synchronize",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.compareQueryResult",
+        "title": "Capture SQL Result for Comparison",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.joinTables",
+        "title": "Join Datasets",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.unionTables",
+        "title": "Union Datasets (Keep Duplicates)",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.combineQueryResults",
+        "title": "Capture SQL Results for Join / Union",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.compareStructures",
+        "title": "Compare Table Structures",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.prepareStructureSync",
+        "title": "Prepare Structure Synchronization",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.swapStructureComparison",
+        "title": "Swap Structure Comparison Direction",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.refreshStructureComparison",
+        "title": "Refresh Structure Comparison",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.openStructureTarget",
+        "title": "Open Structure Target Definition",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.configureStructureConversions",
+        "title": "Configure Structure Column Conversions",
+        "category": "DBNook"
+      },
+      {
+        "command": "dbWorkbench.executeExplain",
+        "title": "Explain Current SQL Statement",
+        "category": "DBNook",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "dbWorkbench.executeAnalyze",
+        "title": "Prepare SQL Execution Analysis",
+        "category": "DBNook",
+        "icon": "$(pulse)"
+      },
+      {
+        "command": "dbWorkbench.executeReviewedAnalyze",
+        "title": "Execute Reviewed Analysis",
+        "category": "DBNook",
+        "icon": "$(play)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "dbWorkbench.addConnection",
+          "when": "view == dbWorkbench.connections",
+          "group": "navigation@1"
+        },
+        {
+          "command": "dbWorkbench.refresh",
+          "when": "view == dbWorkbench.connections",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dbWorkbench.filterConnections",
+          "when": "view == dbWorkbench.connections",
+          "group": "navigation@3"
+        },
+        {
+          "command": "dbWorkbench.clearConnectionFilter",
+          "when": "view == dbWorkbench.connections && dbWorkbench.filtered",
+          "group": "navigation@4"
+        },
+        {
+          "command": "dbWorkbench.quickOpenObject",
+          "when": "view == dbWorkbench.connections",
+          "group": "navigation@5"
+        },
+        {
+          "command": "dbWorkbench.importConnections",
+          "when": "view == dbWorkbench.connections",
+          "group": "connection-transfer@1"
+        },
+        {
+          "command": "dbWorkbench.exportConnections",
+          "when": "view == dbWorkbench.connections",
+          "group": "connection-transfer@2"
+        },
+        {
+          "command": "dbWorkbench.diagnoseConnections",
+          "when": "view == dbWorkbench.connections",
+          "group": "diagnostics"
+        },
+        {
+          "command": "dbWorkbench.auth.add",
+          "when": "view == dbWorkbench.authenticationProfiles",
+          "group": "navigation@1"
+        },
+        {
+          "command": "dbWorkbench.auth.refresh",
+          "when": "view == dbWorkbench.authenticationProfiles",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dbWorkbench.tunnel.add",
+          "when": "view == dbWorkbench.tunnels",
+          "group": "navigation@1"
+        },
+        {
+          "command": "dbWorkbench.tunnel.refresh",
+          "when": "view == dbWorkbench.tunnels",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dbWorkbench.history.refresh",
+          "when": "view == dbWorkbench.history && dbWorkbench.historyEnabled",
+          "group": "navigation@1"
+        },
+        {
+          "command": "dbWorkbench.history.search",
+          "when": "view == dbWorkbench.history && dbWorkbench.historyEnabled",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dbWorkbench.history.disable",
+          "when": "view == dbWorkbench.history && dbWorkbench.historyEnabled",
+          "group": "options@1"
+        },
+        {
+          "command": "dbWorkbench.history.clear",
+          "when": "view == dbWorkbench.history && dbWorkbench.historyEnabled",
+          "group": "options@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "dbWorkbench.openDefinition",
+          "when": "view == dbWorkbench.connections && (viewItem =~ /^connection/ || viewItem == database || viewItem == object || viewItem == object-favorite || viewItem == folder)",
+          "group": "structure@3"
+        },
+        {
+          "command": "dbWorkbench.newQuery",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^connection/",
+          "group": "inline@1"
+        },
+        {
+          "command": "dbWorkbench.editConnection",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^connection/",
+          "group": "connection@1"
+        },
+        {
+          "command": "dbWorkbench.duplicateConnection",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^connection/",
+          "group": "connection@2"
+        },
+        {
+          "command": "dbWorkbench.copyConnectionString",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^connection/",
+          "group": "connection-transfer@1"
+        },
+        {
+          "command": "dbWorkbench.exportConnections",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^connection/",
+          "group": "connection-transfer@2"
+        },
+        {
+          "command": "dbWorkbench.groupConnections",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^connection/",
+          "group": "organization@1"
+        },
+        {
+          "command": "dbWorkbench.ungroupConnections",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^connection/",
+          "group": "organization@2"
+        },
+        {
+          "command": "dbWorkbench.renameGroup",
+          "when": "view == dbWorkbench.connections && viewItem == group",
+          "group": "organization@1"
+        },
+        {
+          "command": "dbWorkbench.moveGroupUp",
+          "when": "view == dbWorkbench.connections && viewItem == group",
+          "group": "organization@2"
+        },
+        {
+          "command": "dbWorkbench.moveGroupDown",
+          "when": "view == dbWorkbench.connections && viewItem == group",
+          "group": "organization@3"
+        },
+        {
+          "command": "dbWorkbench.removeGroup",
+          "when": "view == dbWorkbench.connections && viewItem == group",
+          "group": "organization@4"
+        },
+        {
+          "command": "dbWorkbench.filterObjects",
+          "when": "view == dbWorkbench.connections && (viewItem =~ /^connection/ || viewItem == folder-filterable || viewItem == database)",
+          "group": "filter@1"
+        },
+        {
+          "command": "dbWorkbench.clearObjectFilter",
+          "when": "view == dbWorkbench.connections && (viewItem =~ /^connection/ || viewItem == folder-filterable || viewItem == database)",
+          "group": "filter@2"
+        },
+        {
+          "command": "dbWorkbench.addFavorite",
+          "when": "view == dbWorkbench.connections && viewItem == object",
+          "group": "navigation"
+        },
+        {
+          "command": "dbWorkbench.removeFavorite",
+          "when": "view == dbWorkbench.connections && viewItem == object-favorite",
+          "group": "navigation"
+        },
+        {
+          "command": "dbWorkbench.copyLabel",
+          "when": "view == dbWorkbench.connections",
+          "group": "copy@1"
+        },
+        {
+          "command": "dbWorkbench.copyQualifiedName",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^object/",
+          "group": "copy@2"
+        },
+        {
+          "command": "dbWorkbench.defaultConnection",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^connection/",
+          "group": "connection@3"
+        },
+        {
+          "command": "dbWorkbench.disconnect",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^connection/",
+          "group": "connection@4"
+        },
+        {
+          "command": "dbWorkbench.deleteConnection",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^connection/",
+          "group": "destructive"
+        },
+        {
+          "command": "dbWorkbench.refresh",
+          "when": "view == dbWorkbench.connections",
+          "group": "refresh"
+        },
+        {
+          "command": "dbWorkbench.auth.edit",
+          "when": "viewItem == authenticationProfile",
+          "group": "resource@0"
+        },
+        {
+          "command": "dbWorkbench.auth.delete",
+          "when": "viewItem == authenticationProfile",
+          "group": "destructive"
+        },
+        {
+          "command": "dbWorkbench.auth.clearCache",
+          "when": "viewItem == authenticationProfile",
+          "group": "resource@1"
+        },
+        {
+          "command": "dbWorkbench.tunnel.edit",
+          "when": "viewItem == sshTunnel || viewItem == sshConfigTunnel",
+          "group": "resource@0"
+        },
+        {
+          "command": "dbWorkbench.tunnel.disconnect",
+          "when": "viewItem == sshTunnel || viewItem == sshConfigTunnel",
+          "group": "resource@1"
+        },
+        {
+          "command": "dbWorkbench.tunnel.logs",
+          "when": "viewItem == sshTunnel || viewItem == sshConfigTunnel",
+          "group": "resource@2"
+        },
+        {
+          "command": "dbWorkbench.tunnel.delete",
+          "when": "viewItem == sshTunnel || viewItem == sshConfigTunnel",
+          "group": "destructive"
+        },
+        {
+          "command": "dbWorkbench.tunnel.source",
+          "when": "viewItem == sshConfigTunnel",
+          "group": "resource@3"
+        },
+        {
+          "command": "dbWorkbench.history.open",
+          "when": "view == dbWorkbench.history && viewItem == queryHistory",
+          "group": "history"
+        },
+        {
+          "command": "dbWorkbench.history.copy",
+          "when": "view == dbWorkbench.history && viewItem == queryHistory",
+          "group": "history"
+        },
+        {
+          "command": "dbWorkbench.history.delete",
+          "when": "view == dbWorkbench.history && viewItem == queryHistory",
+          "group": "history"
+        },
+        {
+          "command": "dbWorkbench.tableStructure",
+          "when": "view == dbWorkbench.connections && (viewItem == object || viewItem == object-favorite)",
+          "group": "structure@1"
+        },
+        {
+          "command": "dbWorkbench.createTable",
+          "when": "view == dbWorkbench.connections && (viewItem =~ /^connection/ || viewItem == database || viewItem == folder-filterable || viewItem == folder)",
+          "group": "structure@2"
+        },
+        {
+          "command": "dbWorkbench.importTableData",
+          "when": "view == dbWorkbench.connections && (viewItem == object || viewItem == object-favorite)",
+          "group": "data-transfer"
+        },
+        {
+          "command": "dbWorkbench.sqliteBackup",
+          "when": "view == dbWorkbench.connections && (viewItem == connection || viewItem == connection-connected)",
+          "group": "data-transfer"
+        },
+        {
+          "command": "dbWorkbench.exportTableData",
+          "when": "view == dbWorkbench.connections && (viewItem == object || viewItem == object-favorite)",
+          "group": "data-transfer"
+        },
+        {
+          "command": "dbWorkbench.serverBackup",
+          "when": "view == dbWorkbench.connections && (viewItem == connection || viewItem == connection-connected)",
+          "group": "data-transfer"
+        },
+        {
+          "command": "dbWorkbench.compareTables",
+          "when": "view == dbWorkbench.connections && (viewItem == object || viewItem == object-favorite)",
+          "group": "data-transfer"
+        },
+        {
+          "command": "dbWorkbench.joinTables",
+          "when": "view == dbWorkbench.connections && (viewItem == object || viewItem == object-favorite)",
+          "group": "data-combination"
+        },
+        {
+          "command": "dbWorkbench.unionTables",
+          "when": "view == dbWorkbench.connections && (viewItem == object || viewItem == object-favorite)",
+          "group": "data-combination"
+        },
+        {
+          "command": "dbWorkbench.compareStructures",
+          "when": "view == dbWorkbench.connections && viewItem =~ /^object/",
+          "group": "comparison"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "dbWorkbench.previewDefinition",
+          "when": "dbWorkbench.editableDefinition",
+          "group": "navigation@4"
+        },
+        {
+          "command": "dbWorkbench.applyDefinition",
+          "when": "dbWorkbench.editableDefinition",
+          "group": "navigation@5"
+        },
+        {
+          "command": "dbWorkbench.compareDefinition",
+          "when": "dbWorkbench.managedDefinition",
+          "group": "definition"
+        },
+        {
+          "command": "dbWorkbench.reloadDefinition",
+          "when": "dbWorkbench.managedDefinition",
+          "group": "definition"
+        },
+        {
+          "command": "dbWorkbench.mapDefinitionColumns",
+          "when": "dbWorkbench.editableDefinition && dbWorkbench.tableDefinition",
+          "group": "definition"
+        },
+        {
+          "command": "dbWorkbench.execute",
+          "when": "editorLangId == sql",
+          "group": "navigation@1"
+        },
+        {
+          "command": "dbWorkbench.commitTransaction",
+          "when": "editorLangId == sql && dbWorkbench.sqlTransactionActive",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dbWorkbench.rollbackTransaction",
+          "when": "editorLangId == sql && dbWorkbench.sqlTransactionActive",
+          "group": "navigation@3"
+        },
+        {
+          "command": "dbWorkbench.selectConnection",
+          "when": "editorLangId == sql",
+          "group": "sql-session"
+        },
+        {
+          "command": "dbWorkbench.beginTransaction",
+          "when": "editorLangId == sql && !dbWorkbench.sqlTransactionActive",
+          "group": "sql-session"
+        },
+        {
+          "command": "dbWorkbench.resetSession",
+          "when": "editorLangId == sql",
+          "group": "sql-session"
+        },
+        {
+          "command": "dbWorkbench.executeCurrent",
+          "when": "resourceLangId == sql && isWorkspaceTrusted",
+          "group": "dbWorkbench@2"
+        },
+        {
+          "command": "dbWorkbench.combineQueryResults",
+          "when": "resourceLangId == sql && isWorkspaceTrusted",
+          "group": "dbWorkbench@6"
+        },
+        {
+          "command": "dbWorkbench.prepareStructureSync",
+          "when": "dbWorkbench.structureComparison",
+          "group": "navigation"
+        },
+        {
+          "command": "dbWorkbench.swapStructureComparison",
+          "when": "dbWorkbench.structureComparison",
+          "group": "navigation"
+        },
+        {
+          "command": "dbWorkbench.refreshStructureComparison",
+          "when": "dbWorkbench.structureComparison",
+          "group": "navigation"
+        },
+        {
+          "command": "dbWorkbench.openStructureTarget",
+          "when": "dbWorkbench.structureComparison",
+          "group": "navigation"
+        },
+        {
+          "command": "dbWorkbench.configureStructureConversions",
+          "when": "dbWorkbench.structureComparison",
+          "group": "navigation"
+        },
+        {
+          "command": "dbWorkbench.executeReviewedAnalyze",
+          "when": "resourceScheme == dbw-plan",
+          "group": "navigation@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "dbWorkbench.executeCurrent",
+          "when": "resourceLangId == sql && isWorkspaceTrusted",
+          "group": "dbWorkbench@2"
+        },
+        {
+          "command": "dbWorkbench.exportQueryData",
+          "when": "resourceLangId == sql && isWorkspaceTrusted",
+          "group": "dbWorkbench@4"
+        },
+        {
+          "command": "dbWorkbench.compareQueryResult",
+          "when": "resourceLangId == sql && isWorkspaceTrusted",
+          "group": "dbWorkbench@5"
+        },
+        {
+          "command": "dbWorkbench.executeExplain",
+          "when": "editorLangId == sql && resourceScheme != dbw-plan",
+          "group": "dbWorkbench@5"
+        },
+        {
+          "command": "dbWorkbench.executeAnalyze",
+          "when": "editorLangId == sql && resourceScheme != dbw-plan",
+          "group": "dbWorkbench@5"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "dbWorkbench.execute",
+        "key": "ctrl+enter",
+        "mac": "ctrl+enter",
+        "when": "editorTextFocus && editorLangId == sql"
+      },
+      {
+        "command": "dbWorkbench.executeCurrent",
+        "key": "ctrl+shift+enter",
+        "mac": "cmd+shift+enter",
+        "when": "editorTextFocus && editorLangId == sql && isWorkspaceTrusted"
+      }
+    ],
+    "configuration": {
+      "title": "DBNook",
+      "properties": {
+        "dbWorkbench.sqlParameters.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prompt for named SQL template parameters before execution. Disable to send SQL using native driver syntax without template substitution. Values stay in memory for the document session."
+        },
+        "dbWorkbench.connections": {
+          "type": "array",
+          "default": [],
+          "description": "Connection profiles. Secrets are stored separately.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "dbWorkbench.defaultConnection": {
+          "type": "string",
+          "default": "",
+          "description": "Default connection ID for SQL documents."
+        },
+        "dbWorkbench.connectionGroupOrder": {
+          "type": "array",
+          "default": [],
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "description": "Connection groups in display order. Other groups follow alphabetically."
+        },
+        "dbWorkbench.rowsToLoad": {
+          "type": "number",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 100000,
+          "description": "Rows fetched when opening a table."
+        },
+        "dbWorkbench.queryRowLimit": {
+          "type": "number",
+          "default": 100000,
+          "minimum": 0,
+          "maximum": 1000000,
+          "description": "Maximum rows per statement result. Zero means unlimited."
+        },
+        "dbWorkbench.nodePath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "description": "Optional Node.js 22.16+ executable for the isolated SQLite runner, on the extension host. Empty uses the bundled runtime when available (Windows x64 offline VSIX), otherwise VS Code's runtime. Reload VS Code after changing."
+        },
+        "dbWorkbench.authenticationProfiles": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "object"
+          },
+          "description": "Shared database authentication metadata. Secrets are stored separately."
+        },
+        "dbWorkbench.sshConfigPaths": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "scope": "machine-overridable",
+          "description": "Ordered absolute SSH Config paths on the extension host. Empty discovers the user's and system's standard SSH Config files. Discovered tunnels are read-only."
+        },
+        "dbWorkbench.tunnels": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "object"
+          },
+          "description": "Reusable SSH tunnel definitions. Passwords and key passphrases are stored separately."
+        },
+        "dbWorkbench.history.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Store submitted SQL and execution summaries locally. SQL may contain sensitive literals. Opening history never executes SQL."
+        },
+        "dbWorkbench.history.recordsPerDatabase": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 1000,
+          "description": "Maximum history records per connection target/database. Applied on the next captured run."
+        },
+        "dbWorkbench.history.logFailedQueries": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include failed and cancelled executions when local query history is enabled."
+        },
+        "dbWorkbench.formatting": {
+          "type": "object",
+          "default": {},
+          "additionalProperties": false,
+          "description": "SQL formatter options. Uses the selected connection dialect and preserves identifier spelling.",
+          "properties": {
+            "keywordCase": {
+              "type": "string",
+              "enum": [
+                "upper",
+                "lower",
+                "preserve"
+              ]
+            },
+            "functionCase": {
+              "type": "string",
+              "enum": [
+                "upper",
+                "lower",
+                "preserve"
+              ]
+            },
+            "dataTypeCase": {
+              "type": "string",
+              "enum": [
+                "upper",
+                "lower",
+                "preserve"
+              ]
+            },
+            "identifierCase": {
+              "type": "string",
+              "enum": [
+                "preserve"
+              ]
+            },
+            "tabWidth": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16
+            },
+            "useTabs": {
+              "type": "boolean"
+            },
+            "indentStyle": {
+              "type": "string",
+              "enum": [
+                "standard",
+                "tabularLeft",
+                "tabularRight"
+              ]
+            },
+            "logicalOperatorNewline": {
+              "type": "string",
+              "enum": [
+                "before",
+                "after"
+              ]
+            },
+            "expressionWidth": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 500
+            },
+            "linesBetweenQueries": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "denseOperators": {
+              "type": "boolean"
+            },
+            "newlineBeforeSemicolon": {
+              "type": "boolean"
+            }
+          }
+        },
+        "dbWorkbench.nativeTools": {
+          "type": "object",
+          "default": {},
+          "scope": "machine-overridable",
+          "additionalProperties": false,
+          "description": "Absolute native backup/restore executable paths on the extension host. Install tools separately; no download occurs. PostgreSQL: pg_dump/pg_restore; MySQL: mysqldump/mysql; MariaDB: mariadb-dump/mariadb.",
+          "properties": {
+            "postgresql": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "dump": {
+                  "type": "string",
+                  "default": ""
+                },
+                "restore": {
+                  "type": "string",
+                  "default": ""
+                }
+              }
+            },
+            "mysql": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "dump": {
+                  "type": "string",
+                  "default": ""
+                },
+                "restore": {
+                  "type": "string",
+                  "default": ""
+                }
+              }
+            },
+            "mariadb": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "dump": {
+                  "type": "string",
+                  "default": ""
+                },
+                "restore": {
+                  "type": "string",
+                  "default": ""
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "preview": true,
+  "icon": "media/icon.png",
+  "keywords": [
+    "database",
+    "sqlite",
+    "postgresql",
+    "mysql",
+    "mariadb",
+    "sql",
+    "database-client"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rick-lzr/DBNook.git"
+  },
+  "homepage": "https://github.com/rick-lzr/DBNook#readme",
+  "bugs": {
+    "url": "https://github.com/rick-lzr/DBNook/issues"
+  }
+}

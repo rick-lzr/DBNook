@@ -1,0 +1,15 @@
+**
+!package.json
+!CHANGELOG.md
+!NOTICE.md
+!LICENSE.txt
+!THIRD_PARTY_NOTICES.txt
+!media/**
+!dist/extension.cjs
+!dist/sqlite-runner.cjs
+!dist/sql-worker.cjs
+!dist/webview/app.js
+!dist/webview/app.css
+!runtime/win32-x64/node.exe
+!runtime/win32-x64/LICENSE.txt
+!runtime/win32-x64/provenance.json

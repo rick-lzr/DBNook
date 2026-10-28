@@ -1,0 +1,12 @@
+**
+!package.json
+!CHANGELOG.md
+!NOTICE.md
+!LICENSE.txt
+!THIRD_PARTY_NOTICES.txt
+!media/**
+!dist/extension.cjs
+!dist/sqlite-runner.cjs
+!dist/sql-worker.cjs
+!dist/webview/app.js
+!dist/webview/app.css

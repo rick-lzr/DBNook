@@ -1,0 +1,11 @@
+.query-session { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 6px 12px; border-bottom: 1px solid var(--vscode-panel-border); font-size: 12px; }
+.query-session-actions { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.query-session-actions button { border: 1px solid var(--vscode-panel-border); padding: 4px 10px; }
+.query-session-actions button:hover:not(:disabled) { background: var(--vscode-toolbar-hoverBackground, #ffffff0e); }
+.transaction-active { color: #d6ac63; }
+.query-run { flex: none; border-bottom: 1px solid var(--vscode-panel-border); }
+.run-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 7px 12px; font-size: 11px; color: var(--vscode-descriptionForeground); }
+.run-summary strong { color: var(--vscode-foreground); font-weight: 500; }
+.result-tabs { display: flex; overflow-x: auto; background: var(--vscode-sideBar-background); }
+.result-tabs button { display: inline-flex; align-items: center; flex: none; gap: 8px; border-radius: 0; padding: 8px 13px; border-right: 1px solid var(--vscode-panel-border); font-size: 12px; }
+.result-tabs button[aria-selected=true] { background: var(--vscode-editor-background); box-shadow: inset 0 2px var(--vscode-focusBorder); }

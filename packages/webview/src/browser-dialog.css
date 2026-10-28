@@ -1,0 +1,12 @@
+.discard-confirmation {
+  max-width: min(420px, calc(100vw - 48px));
+  padding: 24px;
+  color: var(--vscode-foreground);
+  background: var(--vscode-editorWidget-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+}
+.discard-confirmation::backdrop { background: rgb(0 0 0 / 55%); }
+.discard-confirmation h2 { margin: 0 0 12px; font-size: 17px; }
+.discard-confirmation p { margin: 0 0 24px; }
+.discard-confirmation > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }

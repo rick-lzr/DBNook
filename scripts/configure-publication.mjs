@@ -1,0 +1,16 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {parseArgs} from 'node:util';
+const {values}=parseArgs({options:{repository:{type:'string'},publisher:{type:'string'},author:{type:'string'},version:{type:'string'}}});
+for(const field of ['repository','publisher','author','version'])if(!values[field])throw new Error(`Missing --${field}`);
+const url=new URL(values.repository);
+if(url.protocol!=='https:'||url.hostname!=='github.com'||url.username||url.password||url.search||url.hash||!/^\/[\w.-]+\/[\w.-]+(?:\.git)?\/?$/.test(url.pathname))throw new Error('Use a GitHub HTTPS repository URL without credentials.');
+const repository=url.origin+url.pathname.replace(/\/$/,'').replace(/\.git$/,'');
+if(!/^[a-z0-9][a-z0-9-]*$/i.test(values.publisher)||/^(local-|YOUR_|example)/i.test(values.publisher))throw new Error('Supply the actual Marketplace Publisher ID.');
+if(!/^\d+\.\d+\.\d+$/.test(values.version)||values.version==='0.27.0')throw new Error('Choose a new numeric public version, e.g. 0.28.0.');
+if(!values.author.trim()||/[\r\n]/.test(values.author))throw new Error('Supply a public author or organization name.');
+const manifest=JSON.parse(await readFile('package.json','utf8')),lock=JSON.parse(await readFile('package-lock.json','utf8'));
+Object.assign(manifest,{publisher:values.publisher,version:values.version,author:values.author.trim(),repository:{type:'git',url:repository+'.git'},homepage:repository+'#readme',bugs:{url:repository+'/issues'}});
+lock.name=manifest.name;lock.version=manifest.version;Object.assign(lock.packages[''],{name:manifest.name,version:manifest.version,license:manifest.license});
+await writeFile('package.json',JSON.stringify(manifest,null,2)+'\n');
+await writeFile('package-lock.json',JSON.stringify(lock,null,2)+'\n');
+console.log('Updated public metadata locally. No credentials, Git remote or publication changed.');
