@@ -4,7 +4,7 @@
 
 [English](README.en.md) · [使用说明](docs/extension-readme.md) · [开发指南](docs/development.md) · [开发路线](docs/roadmap.md)
 
-DBNook 正在准备首个公开预览版本，目前尚未发布到 Marketplace。完整的四库日用验收尚未关闭，已知限制见下文。
+首个公开版本为 **0.28.0 Preview**，通过 [GitHub Releases](https://github.com/rick-lzr/DBNook/releases/tag/v0.28.0) 分发，尚未发布到 Marketplace。完整的四库日用验收尚未关闭，已知限制见下文。
 
 ## 能做什么
 
@@ -34,7 +34,7 @@ DBNook 正在准备首个公开预览版本，目前尚未发布到 Marketplace�
 
 ## 安装与开始
 
-公开预览包发布后，从仓库 Releases 获取 VSIX，在 VS Code 中运行 **Extensions: Install from VSIX**。
+从 [GitHub Releases](https://github.com/rick-lzr/DBNook/releases) 获取 VSIX，在 VS Code 中运行 **Extensions: Install from VSIX**。扩展标识为 `rick-lzr.dbnook`，作者为 `rick-lzr`。
 
 - **Windows x64 离线包**：包含固定版本 Node.js SQLite 运行时；安装后打开 SQLite 不需要联网下载驱动。
 - **普通包**：不携带运行时。VS Code 自带 Node.js 必须具有所需 API，或在 `dbWorkbench.nodePath` 设置兼容 Node.js 可执行文件的绝对路径。仅安装系统 sqlite3 无法解决运行时不兼容。

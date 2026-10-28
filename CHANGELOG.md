@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.28.0 — unreleased public Preview candidate
+## 0.28.0 — 2026-10-28 — public Preview
 
 - Prepare DBNook branding, GPL-3.0-only licensing, public documentation and source repository boundaries.
 - Add source/package audits, reproducible offline runtime preparation and manual build workflows.
-- Repository: https://github.com/rick-lzr/DBNook. Marketplace publisher and public author are not configured yet. No Marketplace release has been made.
+- Author and Marketplace Publisher ID: rick-lzr. Extension ID: rick-lzr.dbnook. Repository: https://github.com/rick-lzr/DBNook. This is a GitHub Preview release; no Marketplace release has been made.
 
 ## 0.27.0 — private development baseline
 

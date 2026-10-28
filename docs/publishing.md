@@ -1,24 +1,24 @@
 # 开源与 Marketplace 发布
 
-源码仓库：https://github.com/rick-lzr/DBNook 。源码已推送至 GitHub；公开作者和 Marketplace Publisher 尚未配置，尚未发布 Marketplace。当前名称 DBNook：检索未发现同名 Marketplace 扩展，不代表商标审查结论。
+源码仓库：https://github.com/rick-lzr/DBNook 。公开作者和 Marketplace Publisher ID 均为 rick-lzr，扩展标识为 rick-lzr.dbnook。0.28.0 通过 GitHub Releases 作为 Preview 分发，尚未发布 Marketplace。当前名称 DBNook：检索未发现同名 Marketplace 扩展，不代表商标审查结论。
 
-## 需要维护者提供
+## 当前发布身份
 
-1. GitHub 仓库已确定为 rick-lzr/DBNook；仍需公开作者/组织名称。
-2. Marketplace Publisher ID：用自己的 Microsoft 账号在 Marketplace 管理后台创建，与 GitHub 用户名不同。
-3. 首个公开版本号，例如 0.28.0；新名称/Publisher 改变扩展 ID，不能把旧私有版直接当同一身份。
-4. 安全报告渠道，推荐启用 GitHub Private vulnerability reporting。
+1. GitHub 仓库：rick-lzr/DBNook；公开作者：rick-lzr。
+2. Marketplace Publisher ID：rick-lzr，由维护者在 Marketplace 管理后台创建。Marketplace 登录独立于 GitHub 登录。
+3. 首个公开版本号：0.28.0；新名称/Publisher 改变扩展 ID，不能把旧私有版直接当同一身份。
+4. 安全报告渠道推荐启用 GitHub Private vulnerability reporting，启用状态以仓库设置为准。
 
 许可证已选 GPL-3.0-only。**不要发送密码、验证码、PAT 或私钥到聊天。** GitHub 在本机用浏览器、Desktop、CLI 或 SSH 授权；Marketplace 首次可自行登录网页上传最终 VSIX，无需交出发布令牌。
 
 ## 配置
 
 ```sh
-node scripts/configure-publication.mjs --repository https://github.com/rick-lzr/DBNook --publisher YOUR_PUBLISHER --author "YOUR_PUBLIC_NAME" --version 0.28.0
+node scripts/configure-publication.mjs --repository https://github.com/rick-lzr/DBNook --publisher rick-lzr --author rick-lzr --version 0.28.0
 npm run release:check
 ```
 
-大写值必须替换为真实信息。脚本更新 package.json 和 lockfile，不登录、不推送、不发布。private: true 只防止误发 npm；Preview 是独立标记。身份缺失时普通本地包可用于测试，正式 release:check 会失败。
+脚本更新 package.json 和 lockfile，不登录、不推送、不发布。private: true 只防止误发 npm；Preview 是独立标记。身份缺失时普通本地包可用于测试，正式 release:check 会失败。
 
 ## 发布前
 

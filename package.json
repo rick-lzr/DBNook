@@ -3,7 +3,7 @@
   "displayName": "DBNook",
   "description": "Connect, query and edit SQLite, PostgreSQL, MySQL and MariaDB inside VS Code.",
   "version": "0.28.0",
-  "publisher": "local-db-workbench",
+  "publisher": "rick-lzr",
   "private": true,
   "type": "module",
   "license": "GPL-3.0-only",
@@ -1326,5 +1326,6 @@
   "homepage": "https://github.com/rick-lzr/DBNook#readme",
   "bugs": {
     "url": "https://github.com/rick-lzr/DBNook/issues"
-  }
+  },
+  "author": "rick-lzr"
 }

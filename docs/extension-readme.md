@@ -1,6 +1,6 @@
 # DBNook
 
-An open-source VS Code database workbench for SQLite, PostgreSQL, MySQL and MariaDB. The first public Preview release is being prepared and is not yet published. Windows x64 is the tested platform; other platforms still need release acceptance. Original project code is GPL-3.0-only; third-party licenses are included with each package.
+An open-source VS Code database workbench for SQLite, PostgreSQL, MySQL and MariaDB. Version 0.28.0 is distributed as a GitHub Preview release and is not yet published to Marketplace. The extension ID is rick-lzr.dbnook, maintained by rick-lzr. Windows x64 is the tested platform; other platforms still need release acceptance. Original project code is GPL-3.0-only; third-party licenses are included with each package.
 
 ## Start
 

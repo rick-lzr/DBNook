@@ -4,7 +4,7 @@
 
 [中文](README.md) · [User guide](docs/extension-readme.md) · [Development](docs/development.md) · [Roadmap](docs/roadmap.md)
 
-The first public Preview release is being prepared; it is not yet on Marketplace. The full four-database daily acceptance suite still has six open cases.
+The first public release is **0.28.0 Preview**, distributed through [GitHub Releases](https://github.com/rick-lzr/DBNook/releases/tag/v0.28.0). It is not yet on Marketplace. The full four-database daily acceptance suite still has six open cases.
 
 ## Features
 
@@ -20,7 +20,7 @@ The first public Preview release is being prepared; it is not yet on Marketplace
 
 The tested platform is Windows x64 desktop VS Code, with a declared minimum of 1.95.0. Previous native regression used 1.95.3 and 1.143.0-insider. Server baselines are PostgreSQL 17.11, MySQL 8.4.11 and MariaDB 11.4.13. MariaDB has its own adapter. Other platforms and server versions are not yet release-qualified; VS Code for the Web is unsupported.
 
-When published, download a VSIX from this repository's Releases and run **Extensions: Install from VSIX**. The Windows x64 offline package includes Node.js 22.22.2 with SQLite 3.51.2. The generic package needs compatible Node.js 22.16+ SQLite APIs in VS Code or an absolute `dbWorkbench.nodePath` setting. Installing the sqlite3 command does not supply those APIs.
+Download a VSIX from this repository's Releases and run **Extensions: Install from VSIX**. The extension ID is `rick-lzr.dbnook`, maintained by `rick-lzr`. The Windows x64 offline package includes Node.js 22.22.2 with SQLite 3.51.2. The generic package needs compatible Node.js 22.16+ SQLite APIs in VS Code or an absolute `dbWorkbench.nodePath` setting. Installing the sqlite3 command does not supply those APIs.
 
 Open **DBNook → Add Connection → Test → Save**, then expand the connection and open a table. Double-click cells to edit and use Save / Ctrl+S to commit. Try **Explore With a Sample Database** for an independent SQLite fixture. New SQL Query opens a bound document; Ctrl+Enter executes its selection or script.
 
